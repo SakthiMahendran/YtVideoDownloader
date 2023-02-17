@@ -102,6 +102,10 @@ func (dp *DownloadPage) renderSelector() *widget.Select {
 
 func (dp *DownloadPage) download() {
 	save := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
+		if err != nil || uc == nil {
+			return
+		}
+
 		fileIndex := dp.selector.SelectedIndex()
 		format := dp.video.Formats.WithAudioChannels().Type("video/mp4")[fileIndex]
 
