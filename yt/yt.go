@@ -37,3 +37,8 @@ func Download(video *youtube.Video, format *youtube.Format, uc fyne.URIWriteClos
 
 	return dloadStatus
 }
+
+func GetVideoSize(video *youtube.Video, format *youtube.Format) int64 {
+	_, vSize, _ := ytClient.GetStream(video, format)
+	return vSize
+}

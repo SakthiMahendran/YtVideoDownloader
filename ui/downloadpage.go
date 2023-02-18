@@ -1,12 +1,13 @@
 package ui
 
 import (
-	"strconv"
+	"fmt"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -18,6 +19,7 @@ type DownloadPage struct {
 	size        fyne.Size
 	name        string
 	newWindow   bool
+	videoSize   binding.String
 	downloadBtn *widget.Button
 	video       *youtube.Video
 	selector    *widget.Select
@@ -65,13 +67,16 @@ func (dp *DownloadPage) renderImage() *canvas.Image {
 }
 
 func (dp *DownloadPage) renderForm() *widget.Form {
+	dp.videoSize = binding.NewString()
+
 	title := widget.NewFormItem("Title:", widget.NewLabel(dp.video.Title))
 	author := widget.NewFormItem("Author:", widget.NewLabel(dp.video.Author))
 	publishDate := widget.NewFormItem("PublishDate:", widget.NewLabel(dp.video.PublishDate.String()))
 	duration := widget.NewFormItem("Duration:", widget.NewLabel((dp.video.Duration - time.Second).String()))
+	size := widget.NewFormItem("Size:", widget.NewLabelWithData(dp.videoSize))
 	selector := widget.NewFormItem("Select:", dp.renderSelector())
 
-	return widget.NewForm(title, author, publishDate, duration, selector)
+	return widget.NewForm(title, author, publishDate, duration, size, selector)
 }
 
 func (dp *DownloadPage) renderControlButtons() *fyne.Container {
@@ -97,12 +102,19 @@ func (dp *DownloadPage) renderSelector() *widget.Select {
 	var videoFromates []string
 
 	for _, formate := range dp.video.Formats.WithAudioChannels().Type("video/mp4") {
-		videoFromates = append(videoFromates, "Quality: "+formate.QualityLabel+", FPS: "+strconv.Itoa(formate.FPS))
+		videoFromates = append(videoFromates, "Quality: "+formate.QualityLabel+", FPS: "+fmt.Sprint(formate))
 	}
 
 	dp.selector = widget.NewSelect(videoFromates, func(s string) {})
 	dp.selector.OnChanged = func(s string) {
-		dp.downloadBtn.Enable()
+		if dp.downloadBtn.Disabled() {
+			dp.downloadBtn.Enable()
+		}
+
+		format := dp.getSelectedVideoFormat()
+		vidoSize := yt.GetVideoSize(dp.video, &format)
+
+		dp.videoSize.Set(dp.formatVideoSize(vidoSize))
 	}
 
 	return dp.selector
@@ -114,8 +126,7 @@ func (dp *DownloadPage) download() {
 			return
 		}
 
-		fileIndex := dp.selector.SelectedIndex()
-		format := dp.video.Formats.WithAudioChannels().Type("video/mp4")[fileIndex]
+		format := dp.getSelectedVideoFormat()
 
 		progressPercent := yt.Download(dp.video, &format, uc)
 
@@ -133,4 +144,30 @@ func (dp *DownloadPage) download() {
 	}, dp.window)
 
 	save.Show()
+}
+
+func (dp *DownloadPage) getSelectedVideoFormat() youtube.Format {
+	selectedIndex := dp.selector.SelectedIndex()
+	format := dp.video.Formats.WithAudioChannels().Type("video/mp4")[selectedIndex]
+
+	return format
+}
+
+func (dp *DownloadPage) formatVideoSize(size int64) string {
+	const (
+		KB = 1 << 10
+		MB = 1 << 20
+		GB = 1 << 30
+	)
+
+	switch {
+	case size >= GB:
+		return fmt.Sprintf("%.2f GB", float64(size)/GB)
+	case size >= MB:
+		return fmt.Sprintf("%.2f MB", float64(size)/MB)
+	case size >= KB:
+		return fmt.Sprintf("%.2f KB", float64(size)/KB)
+	default:
+		return fmt.Sprintf("%d size", size)
+	}
 }
