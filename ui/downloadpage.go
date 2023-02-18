@@ -102,7 +102,7 @@ func (dp *DownloadPage) renderSelector() *widget.Select {
 	var videoFromates []string
 
 	for _, formate := range dp.video.Formats.WithAudioChannels().Type("video/mp4") {
-		videoFromates = append(videoFromates, "Quality: "+formate.QualityLabel+", FPS: "+fmt.Sprint(formate))
+		videoFromates = append(videoFromates, "Quality: "+formate.QualityLabel+", FPS: "+fmt.Sprint(formate.FPS))
 	}
 
 	dp.selector = widget.NewSelect(videoFromates, func(s string) {})
