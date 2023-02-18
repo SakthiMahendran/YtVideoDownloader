@@ -2,6 +2,7 @@ package ui
 
 import (
 	"strconv"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -67,7 +68,7 @@ func (dp *DownloadPage) renderForm() *widget.Form {
 	title := widget.NewFormItem("Title:", widget.NewLabel(dp.video.Title))
 	author := widget.NewFormItem("Author:", widget.NewLabel(dp.video.Author))
 	publishDate := widget.NewFormItem("PublishDate:", widget.NewLabel(dp.video.PublishDate.String()))
-	duration := widget.NewFormItem("Duration:", widget.NewLabel(dp.video.Duration.String()))
+	duration := widget.NewFormItem("Duration:", widget.NewLabel((dp.video.Duration - time.Second).String()))
 	selector := widget.NewFormItem("Select:", dp.renderSelector())
 
 	return widget.NewForm(title, author, publishDate, duration, selector)
