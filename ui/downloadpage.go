@@ -14,13 +14,14 @@ import (
 )
 
 type DownloadPage struct {
-	size      fyne.Size
-	name      string
-	newWindow bool
-	video     *youtube.Video
-	selector  *widget.Select
-	window    fyne.Window
-	mainFrame *MainFrame
+	size        fyne.Size
+	name        string
+	newWindow   bool
+	downloadBtn *widget.Button
+	video       *youtube.Video
+	selector    *widget.Select
+	window      fyne.Window
+	mainFrame   *MainFrame
 }
 
 func (dp *DownloadPage) pageSize() fyne.Size {
@@ -73,18 +74,21 @@ func (dp *DownloadPage) renderForm() *widget.Form {
 }
 
 func (dp *DownloadPage) renderControlButtons() *fyne.Container {
-	downloadBtn := widget.NewButton("Download", func() {
+	dp.downloadBtn = widget.NewButton("Download", func() {
 		go dp.download()
 	})
+
+	dp.downloadBtn.Disable()
+
 	cancelBtn := widget.NewButton("Cancel", func() {
 		dp.window.Close()
 	})
 
-	downloadBtn.SetIcon(theme.DownloadIcon())
+	dp.downloadBtn.SetIcon(theme.DownloadIcon())
 	cancelBtn.SetIcon(theme.CancelIcon())
 
 	return container.NewCenter(
-		container.NewHBox(cancelBtn, downloadBtn),
+		container.NewHBox(cancelBtn, dp.downloadBtn),
 	)
 }
 
@@ -96,6 +100,9 @@ func (dp *DownloadPage) renderSelector() *widget.Select {
 	}
 
 	dp.selector = widget.NewSelect(videoFromates, func(s string) {})
+	dp.selector.OnChanged = func(s string) {
+		dp.downloadBtn.Enable()
+	}
 
 	return dp.selector
 }
