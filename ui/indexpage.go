@@ -1,10 +1,12 @@
 package ui
 
 import (
+	"errors"
 	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/SakthiMahendran/YtDownloader/yt"
@@ -80,6 +82,7 @@ func (ip *IndexPage) renderFindButton() *widget.Button {
 
 			if err != nil {
 				ip.urlEntry.SetText("")
+				dialog.ShowError(errors.New("Invalid URL"), ip.window)
 				return
 			}
 

@@ -128,7 +128,6 @@ func (dp *DownloadPage) download() {
 
 		progress.Hide()
 
-		// dialog.ShowConfirm("", "Video Downloaded", func(b bool) {}, dp.window)
 		dialog.ShowInformation("", "Video Downloaded", dp.window)
 
 	}, dp.window)
