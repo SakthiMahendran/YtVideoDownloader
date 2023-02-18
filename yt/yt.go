@@ -1,6 +1,8 @@
 package yt
 
 import (
+	"io"
+
 	"fyne.io/fyne/v2"
 	"github.com/kkdai/youtube/v2"
 )
@@ -15,24 +17,17 @@ func Download(video *youtube.Video, format *youtube.Format, uc fyne.URIWriteClos
 	dloadStatus := make(chan float64)
 
 	go func(chan float64) {
-		var vBuff [1024]byte
-		var totReaded float64
-
 		vStream, vSize, _ := ytClient.GetStream(video, format)
+		vReader := NewVideoReader(vStream)
+
+		go io.Copy(uc, &vReader)
 
 		for {
-			readed, _ := vStream.Read(vBuff[:])
-
-			if readed == 0 {
+			status := vReader.total / float64(vSize) * 100
+			dloadStatus <- status
+			if status == 100 {
 				break
 			}
-
-			uc.Write(vBuff[:])
-
-			totReaded += float64(readed)
-			percent := (totReaded / float64(vSize))
-
-			dloadStatus <- percent
 		}
 
 		close(dloadStatus)

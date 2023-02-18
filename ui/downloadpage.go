@@ -115,7 +115,7 @@ func (dp *DownloadPage) download() {
 		progress.Show()
 
 		for percent := range progressPercent {
-			progress.SetValue(percent)
+			progress.SetValue(percent / 100)
 		}
 
 		progress.Hide()
