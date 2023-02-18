@@ -82,7 +82,7 @@ func (ip *IndexPage) renderFindButton() *widget.Button {
 
 			if err != nil {
 				ip.urlEntry.SetText("")
-				dialog.ShowError(errors.New("Invalid URL"), ip.window)
+				dialog.ShowError(errors.New("invalid url"), ip.window)
 				return
 			}
 
