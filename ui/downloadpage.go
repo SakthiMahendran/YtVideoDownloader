@@ -2,6 +2,8 @@ package ui
 
 import (
 	"fmt"
+	"os"
+	"strings"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -9,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/SakthiMahendran/YtDownloader/yt"
@@ -143,6 +146,9 @@ func (dp *DownloadPage) download() {
 
 	}, dp.window)
 
+	save.SetFileName(dp.sanitizeFilename(dp.video.Title) + ".mp4")
+	save.SetLocation(dp.getCurrentDir())
+
 	save.Show()
 }
 
@@ -170,4 +176,23 @@ func (dp *DownloadPage) formatVideoSize(size int64) string {
 	default:
 		return fmt.Sprintf("%d size", size)
 	}
+}
+
+func (dp *DownloadPage) sanitizeFilename(filename string) string {
+	illegalChars := []string{"\\", "/", ":", "*", "?", "\"", "<", ">", "|"}
+	var sanitizedFilename string
+
+	for _, c := range illegalChars {
+		sanitizedFilename = strings.ReplaceAll(sanitizedFilename, c, "")
+	}
+
+	return sanitizedFilename
+}
+
+func (dp *DownloadPage) getCurrentDir() fyne.ListableURI {
+	currentDir, _ := os.Getwd()
+	currentURI := storage.NewFileURI(currentDir)
+	currentListableURI, _ := storage.ListerForURI(currentURI)
+
+	return currentListableURI
 }
