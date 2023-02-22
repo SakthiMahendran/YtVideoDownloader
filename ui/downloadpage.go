@@ -180,7 +180,7 @@ func (dp *DownloadPage) formatVideoSize(size int64) string {
 
 func (dp *DownloadPage) sanitizeFilename(filename string) string {
 	illegalChars := []string{"\\", "/", ":", "*", "?", "\"", "<", ">", "|"}
-	var sanitizedFilename string
+	sanitizedFilename := filename
 
 	for _, c := range illegalChars {
 		sanitizedFilename = strings.ReplaceAll(sanitizedFilename, c, "")
